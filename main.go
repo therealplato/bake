@@ -44,13 +44,13 @@ func bake(f io.Reader, g io.Writer) {
 			}
 			log.Fatal("failed reading buf: " + err.Error())
 		}
-		_, err := g.Write([]byte(fmt.Sprintf("%#x, ", b)))
+		_, err := g.Write([]byte(fmt.Sprintf("0x%02x, ", b)))
 		if err != nil {
 			log.Fatal("failed writing g: " + err.Error())
 		}
+		m++
 
-		if m%20 == 0 {
-			// 80 characters
+		if m%10 == 0 {
 			g.Write([]byte("\n"))
 		}
 	}
@@ -72,7 +72,7 @@ var baked = []byte{
 
 func tail(g io.Writer) {
 	_, err := g.Write(
-		[]byte("}\n"),
+		[]byte("\n}\n"),
 	)
 	if err != nil {
 		log.Fatal("failed writing g: " + err.Error())
