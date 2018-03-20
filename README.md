@@ -21,4 +21,5 @@ _, err := src.Write(baked)
 if err != nil {
   log.Fatal(err)
 }
+// src is io.Reader
 ```
