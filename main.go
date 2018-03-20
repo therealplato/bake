@@ -10,16 +10,17 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		log.Fatal(`github.com/therealplato/bake
+		fmt.Println(`github.com/therealplato/bake
 make a go file containing filename's contents as a variable
 usage: bake filename`)
+		os.Exit(1)
 	}
 	filename := os.Args[1]
 	f, err := os.Open(filename)
 	if err != nil {
 		log.Fatal(filename + " not found")
 	}
-	outfile := filename + ".go"
+	outfile := "baked.go"
 	g, err := os.Create(outfile)
 	bake(f, g)
 }
@@ -33,37 +34,25 @@ func bake(f io.Reader, g io.Writer) {
 		buf bytes.Buffer
 	)
 	head(g)
+	n, err = buf.ReadFrom(f)
+	fmt.Printf("read %v bytes\n", n)
 	for {
-		n, err = buf.ReadFrom(f)
-		fmt.Printf("outer %v\n", n)
+		b, err = buf.ReadByte()
 		if err != nil {
 			if err == io.EOF {
 				break
 			}
-			log.Fatal("failed reading g: " + err.Error())
+			log.Fatal("failed reading buf: " + err.Error())
+		}
+		_, err := g.Write([]byte(fmt.Sprintf("%#x, ", b)))
+		if err != nil {
+			log.Fatal("failed writing g: " + err.Error())
 		}
 
-		m = m + n
-		for {
-			fmt.Printf("inner %v\n", m)
-			b, err = buf.ReadByte()
-			if err != nil {
-				if err == io.EOF {
-					break
-				}
-				log.Fatal("failed reading buf: " + err.Error())
-			}
-			_, err := g.Write([]byte(fmt.Sprintf("%#x, ", b)))
-			if err != nil {
-				log.Fatal("failed writing g: " + err.Error())
-			}
-
-			if m%20 == 0 {
-				// 80 characters
-				g.Write([]byte("\n"))
-			}
+		if m%20 == 0 {
+			// 80 characters
+			g.Write([]byte("\n"))
 		}
-		buf.Reset()
 	}
 	tail(g)
 }
